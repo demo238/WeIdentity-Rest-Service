@@ -34,13 +34,13 @@ public final class WeIdentityFunctionNames {
      * Function names to be compared against the passed in encode/send transaction parameters. Case
      * insensitive.
      */
-    public static final String FUNCNAME_CREATE_WEID = "createWeId";
+    public static final String FUNCNAME_CREATE_WEID = "createTDId";
     public static final String FUNCNAME_CREATE_WEID_AND_RETURN_DOC = "createWeId2";
     public static final String FUNCNAME_REGISTER_AUTHORITY_ISSUER = "registerAuthorityIssuer";
     public static final String FUNCNAME_REGISTER_CPT = "registerCpt";
     public static final String FUNCNAME_CREATE_CREDENTIAL = "createCredential";
     public static final String FUNCNAME_VERIFY_CREDENTIAL = "verifyCredential";
-    public static final String FUNCNAME_GET_WEID_DOCUMENT = "getWeIdDocument";
+    public static final String FUNCNAME_GET_WEID_DOCUMENT = "getTDIdDocument";
     public static final String FUNCNAME_GET_WEID_DOCUMENT_JSON = "getWeIdDocumentJson";
     public static final String FUNCNAME_QUERY_AUTHORITY_ISSUER = "queryAuthorityIssuer";
     public static final String FUNCNAME_QUERY_CPT = "queryCpt";
