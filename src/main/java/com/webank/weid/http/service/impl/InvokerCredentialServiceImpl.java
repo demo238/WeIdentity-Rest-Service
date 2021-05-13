@@ -68,7 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class InvokerCredentialServiceImpl extends BaseService implements InvokerCredentialService {
 
     private Logger logger = LoggerFactory.getLogger(InvokerCredentialServiceImpl.class);

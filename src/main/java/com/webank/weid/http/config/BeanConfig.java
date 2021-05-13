@@ -36,7 +36,7 @@ import com.webank.weid.service.impl.WeIdServiceImpl;
  *
  * @author darwindu
  */
-@Configuration
+//@Configuration
 public class BeanConfig {
 
     @Bean("authorityIssuerService")

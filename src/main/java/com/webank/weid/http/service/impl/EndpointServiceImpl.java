@@ -35,7 +35,7 @@ import com.webank.weid.http.service.EndpointService;
 import com.webank.weid.http.service.rpc.RpcConnectionHandler;
 import com.webank.weid.http.util.EndpointDataUtil;
 
-@Component
+//@Component
 public class EndpointServiceImpl extends BaseService implements EndpointService {
 
     static {

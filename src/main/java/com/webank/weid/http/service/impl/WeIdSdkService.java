@@ -12,18 +12,21 @@ import com.webank.weid.http.util.ConfigUtils;
 import com.webank.weid.http.util.FileUtils;
 import com.webank.weid.http.util.WeIdSdkUtils;
 import com.webank.weid.protocol.base.*;
+import com.webank.weid.protocol.base.IssuerType;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
+import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.CptService;
+import com.webank.weid.rpc.PolicyService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.AuthorityIssuerServiceImpl;
 import com.webank.weid.service.impl.CptServiceImpl;
+import com.webank.weid.service.impl.PolicyServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -45,14 +48,23 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class WeIdSdkService extends BaseService{
+public class WeIdSdkService {
 
-	@Autowired
+//	@Autowired
 	private ConfigService configService;
 
 	private CptService cptService;
 	private AuthorityIssuerService authorityIssuerService;
+//	@Autowired
 	private WeIdService weIdService;
+	private PolicyService policyService;
+
+	private PolicyService getPolicyService() {
+		if (policyService == null) {
+			policyService = new PolicyServiceImpl();
+		}
+		return policyService;
+	}
 
 	private CptService getCptService() {
 		if (cptService == null) {
@@ -127,7 +139,7 @@ public class WeIdSdkService extends BaseService{
 		List<String> list = WeServerUtils.getGroupList();
 		if (filterMaster) {
 			return list.stream()
-					.filter(s -> !s.equals(BaseService.masterGroupId.toString()))
+					.filter(s -> !s.equals("BaseService.masterGroupId.toString()"))
 					.collect(Collectors.toList());
 		}
 		return list;
@@ -510,25 +522,7 @@ public class WeIdSdkService extends BaseService{
 		return new ResponseData<>(pageDto, ErrorCode.SUCCESS);
 	}
 
-	public List<IssuerType> getIssuerTypeList() {
-		String currentHash = WeIdSdkUtils.getMainHash();
-		List<IssuerType> list = new ArrayList<>();
-		if (StringUtils.isBlank(currentHash)) {
-			return list;
-		}
-		File targetDir = new File(BuildToolsConstant.ISSUER_TYPE_PATH + "/" + currentHash);
-		if (!targetDir.exists()) {
-			return list;
-		}
-		for (File file : Objects.requireNonNull(targetDir.listFiles())) {
-			//根据weid判断本地是否存在
-			String jsonData = FileUtils.readFile(file.getAbsolutePath());
-			IssuerType info = DataToolUtils.deserialize(jsonData, IssuerType.class);
-			list.add(info);
-		}
-		Collections.sort(list);
-		return list;
-	}
+
 
 	public ResponseData<String> createWeId(DataFrom from) {
 		ResponseData<CreateWeIdDataResult> response = getWeIdService().createWeId();
@@ -621,11 +615,11 @@ public class WeIdSdkService extends BaseService{
 		String masterGroupId = configService.loadConfig().get("group_id");
 		for (Map.Entry<String, List<String>> entry : entrySet) {
 			Map<String, String> info = new HashMap<>();
-			info.put("groupId", entry.getKey());
-			info.put("nodes", entry.getValue().toString());
-			info.put("type", "子群组");
+			info.put("GroupId", entry.getKey());
+			info.put("Nods", entry.getValue().toString());
+			info.put("Type", "子群组");
 			if (masterGroupId.equals(entry.getKey())) {
-				info.put("type", "主群组");
+				info.put("Type", "主群组");
 				list.add(0, info);
 			} else {
 				list.add(info);
@@ -634,5 +628,90 @@ public class WeIdSdkService extends BaseService{
 		return new ResponseData<>(list, ErrorCode.SUCCESS);
 	}
 
+	public ResponseData<Boolean> addIssuerIntoIssuerType(String type, String weId) {
+		log.info("[addIssuerIntoIssuerType] Adding WeIdentity DID {} in {}", weId, type);
+		ResponseData<Boolean> response = getAuthorityIssuerService()
+				.addIssuerIntoIssuerType(getCurrentWeIdAuth(), type, weId);
+		if (!response.getErrorCode().equals(ErrorCode.SUCCESS.getCode())) {
+			log.error(
+					"[addIssuerIntoIssuerType] add {} into {} fail. error code : {}, error msg :{}",
+					weId,
+					type,
+					response.getErrorCode(),
+					response.getErrorMessage()
+			);
+			return response;
+		}
 
+		log.info("[addIssuerIntoIssuerType] add {} into {} success.", weId, type);
+		return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS);
+	}
+
+	public ResponseData<Boolean> removeIssuer(String weId) {
+		log.info("[removeIssuer] begin remove authority issuer={} ...", weId);
+		RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = new RemoveAuthorityIssuerArgs();
+		removeAuthorityIssuerArgs.setWeId(weId);
+		String hash = WeIdSdkUtils.getMainHash();
+		removeAuthorityIssuerArgs.setWeIdPrivateKey(WeIdSdkUtils.getWeIdPrivateKey(hash));
+
+		return getAuthorityIssuerService().removeAuthorityIssuer(removeAuthorityIssuerArgs);
+	}
+
+	public ResponseData<Boolean> registerIssuerType(String type, DataFrom from) {
+		log.info("[registerIssuerType] Registering issuer type with best effort: " + type);
+		ResponseData<Boolean> response = getAuthorityIssuerService()
+				.registerIssuerType(getCurrentWeIdAuth(), type);
+		if (!response.getErrorCode().equals(ErrorCode.SUCCESS.getCode())) {
+			log.error(
+					"[registerIssuerType] register issuer type {} faild. error code : {}, error msg :{}",
+					type,
+					response.getErrorCode(),
+					response.getErrorMessage()
+			);
+			return response;
+		}
+
+		log.info("[registerIssuerType] register issuer type {} success.", type);
+		return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS);
+	}
+
+	public ResponseData<String> queryDidDocument(String did) {
+		return weIdService.getWeIdDocumentJson(did);
+	}
+
+	public ResponseData<PageDto<PolicyInfo>> getPolicyList(PageDto<PolicyInfo> pageDto) {
+		ResponseData<List<Integer>> response =
+				getPolicyService().getAllClaimPolicies(pageDto.getStartIndex(), pageDto.getPageSize());
+		if (response.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+			log.error("getPolicyList error, msg:{}", response.getErrorMessage());
+			return new ResponseData<>(null, response.getErrorCode(), response.getErrorMessage());
+		}
+
+		List<PolicyInfo> list = new ArrayList<>();
+		if (response.getResult() != null) {
+			for (Integer value : response.getResult()) {
+				PolicyInfo policyInfo = new PolicyInfo();
+				policyInfo.setId(value.toString());
+				list.add(policyInfo);
+			}
+		}
+		pageDto.setAllCount(getPolicyService().getPolicyCount().getResult());
+		pageDto.setDataList(list);
+		return new ResponseData<>(pageDto, ErrorCode.SUCCESS);
+	}
+
+	public ResponseData<Boolean> registerClaimPolicy(Integer cptId, String policyJson) {
+		WeIdAuthentication currentWeIdAuth = getCurrentWeIdAuth();
+		ResponseData<Integer> response = getPolicyService().registerClaimPolicy(cptId, policyJson, currentWeIdAuth);
+		if (response.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+			log.error("[registerClaimPolicy] register ClaimPolicy fail. ErrorCode is:{}, msg :{}",
+					response.getErrorCode(),
+					response.getErrorMessage());
+			return new ResponseData<>(Boolean.FALSE, response.getErrorCode(), response.getErrorMessage());
+		}
+
+		log.info(
+				"[registerClaimPolicy] register ClaimPolicys success. cpt id = {}, policyId = {}", cptId, response.getResult());
+		return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS);
+	}
 }

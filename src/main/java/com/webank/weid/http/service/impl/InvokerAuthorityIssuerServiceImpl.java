@@ -50,7 +50,7 @@ import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.impl.AuthorityIssuerServiceImpl;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
 
-@Component
+//@Component
 public class InvokerAuthorityIssuerServiceImpl extends BaseService implements
     InvokerAuthorityIssuerService {
 

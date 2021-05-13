@@ -1,0 +1,13 @@
+{
+  "cptType" : "original",
+  "$schema" : "http://json-schema.org/draft-04/schema#",
+  "description" : "s ",
+  "title" : "aaa ",
+  "type" : "object",
+  "properties" : {
+    "w" : {
+      "description" : "ww",
+      "type" : "string"
+    }
+  }
+}

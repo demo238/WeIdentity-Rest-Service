@@ -52,7 +52,7 @@ import com.webank.weid.http.service.InvokerBAC004AssetService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.util.WeIdUtils;
 
-@Component
+//@Component
 public class InvokerBAC004AssetServiceImpl 
     extends BaseService 
     implements InvokerBAC004AssetService  {

@@ -78,7 +78,7 @@ List json = [
 ]
 
 List weid_java_sdk = [
-        'com.webank:weid-java-sdk:1.8.0'
+        'com.webank:weid-java-sdk:1.8.1'
 ]
 
 // In this section you declare the dependencies for your production and test code
@@ -167,4 +167,10 @@ jar {
             into 'dist'
         }
     }
+}
+
+clean {
+    delete "dist"
+    delete "resources/fisco.properties"
+    delete "resources/weidentity.properties"
 }

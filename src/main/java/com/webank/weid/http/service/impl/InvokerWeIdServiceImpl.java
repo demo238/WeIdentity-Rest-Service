@@ -63,7 +63,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 
-@Component
+//@Component
 public class InvokerWeIdServiceImpl extends BaseService implements InvokerWeIdService {
 
     private Logger logger = LoggerFactory.getLogger(InvokerWeIdServiceImpl.class);

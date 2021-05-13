@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
  *
  * @author chaoxinhu and darwindu
  **/
-@Component
+//@Component
 public class TransactionServiceImpl extends BaseService implements TransactionService {
 
     private Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);

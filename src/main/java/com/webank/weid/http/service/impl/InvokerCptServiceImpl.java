@@ -47,7 +47,7 @@ import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.impl.CptServiceImpl;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
 
-@Component
+//@Component
 public class InvokerCptServiceImpl extends BaseService implements InvokerCptService {
 
     private Logger logger = LoggerFactory.getLogger(InvokerCptService.class);

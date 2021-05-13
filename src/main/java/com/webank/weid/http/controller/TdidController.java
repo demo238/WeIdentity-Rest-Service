@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -22,7 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *  Information form chain and tbass.
+ * Information form chain and tbass.
  *
  * @author garyding
  */
@@ -67,12 +68,6 @@ public class TdidController {
         return weIdSdkService.getWeIdList(pageDto, blockNumber, pageSize, indexInBlock, direction);
     }
 
-    @Description("查询issuer type列表")
-    @GetMapping("/getIssuerTypeList")
-    public ResponseData<List<IssuerType>> getIssuerTypeList() {
-        log.info("begin getIssuerTypeList.");
-        return new ResponseData<>(weIdSdkService.getIssuerTypeList(), ErrorCode.SUCCESS);
-    }
 
     @Description("系统自动生成公私钥生成weId")
     @GetMapping("/createTDid")
@@ -96,29 +91,28 @@ public class TdidController {
     }
 
 
-
     @Description("注册issuer")
     @PostMapping("/registerIssuer")
-    public ResponseData<Boolean> registerIssuer(@RequestParam("weId") String weId,
+    public ResponseData<Boolean> registerIssuer(@RequestParam("did") String did,
                                                 @RequestParam("name") String name,
                                                 @RequestParam("description") String description) {
-        log.info("begin register issuer, weId:{}, name:{}, description:{}", weId, name, description);
+        log.info("begin register issuer, weId:{}, name:{}, description:{}", did, name, description);
         description = StringEscapeUtils.unescapeHtml(description);
-        return weIdSdkService.registerIssuer(weId, name, description);
+        return weIdSdkService.registerIssuer(did, name, description);
     }
 
     @Description("认证issuer")
     @PostMapping("/recognizeAuthorityIssuer")
-    public ResponseData<Boolean> recognizeAuthorityIssuer(@RequestParam("weId") String weId) {
-        log.info("begin recognize authority issuer, weId:{}", weId);
-        return weIdSdkService.recognizeAuthorityIssuer(weId);
+    public ResponseData<Boolean> recognizeAuthorityIssuer(@RequestParam("did") String did) {
+        log.info("begin recognize authority issuer, did:{}", did);
+        return weIdSdkService.recognizeAuthorityIssuer(did);
     }
 
     @Description("撤销认证issuer")
     @PostMapping("/deRecognizeAuthorityIssuer")
-    public ResponseData<Boolean> deRecognizeAuthorityIssuer(@RequestParam("weId") String weId) {
-        log.info("begin deRecognize authority issuer, weId:{}", weId);
-        return weIdSdkService.deRecognizeAuthorityIssuer(weId);
+    public ResponseData<Boolean> deRecognizeAuthorityIssuer(@RequestParam("did") String did) {
+        log.info("begin deRecognize authority issuer, did:{}", did);
+        return weIdSdkService.deRecognizeAuthorityIssuer(did);
     }
 
     @GetMapping("/getIssuerList")
@@ -129,6 +123,30 @@ public class TdidController {
         log.info("begin get issuer list, iDisplayStart:{}, iDisplayLength:{}", iDisplayStart, iDisplayLength);
         PageDto<Issuer> pageDto = new PageDto<Issuer>(iDisplayStart, iDisplayLength);
         return weIdSdkService.getIssuerList(pageDto);
+    }
+
+    @Description("移除issuer")
+    @PostMapping("/removeIssuer")
+    public ResponseData<Boolean> removeIssuer(@RequestParam("weId") String weId) {
+        log.info("begin remove issuer, weId:{}", weId);
+        return weIdSdkService.removeIssuer(weId);
+    }
+
+    @Description("注册issuer type")
+    @PostMapping("/registerIssuerType")
+    public ResponseData<Boolean> registerIssuerType(@RequestParam("issuerType") String type) {
+        log.info("begin register issuer type, issuerType:{}", type);
+        return weIdSdkService.registerIssuerType(type, DataFrom.WEB);
+    }
+
+    @Description("向IssuerType中添加成员")
+    @PostMapping("/addIssuerIntoIssuerType")
+    public ResponseData<Boolean> addIssuerIntoIssuerType(
+            @RequestParam("issuerType") String type,
+            @RequestParam("tdid") String weId
+    ) {
+        log.info("begin addIssuerIntoIssuerType, weId:{}, issuerType:{}", weId, type);
+        return weIdSdkService.addIssuerIntoIssuerType(type, weId);
     }
 
     @Description("CPT注册")
@@ -170,6 +188,41 @@ public class TdidController {
     public ResponseData<String> queryCptSchema(@PathVariable("cptId") Integer cptId) {
         log.info("begin queryCptSchema, cptId:{}", cptId);
         return weIdSdkService.queryCptSchema(cptId);
+    }
+
+    @Description("获取did Document信息")
+    @GetMapping("/getTdidDocument")
+    public ResponseData<String> queryDidDocument(@RequestParam("did") String did) {
+        log.info("begin queryDidDocument , cptId:{}", did);
+        return weIdSdkService.queryDidDocument(did);
+    }
+
+    @Description("获取公钥")
+    @GetMapping("/getPublicKey")
+    public ResponseData<String> getPublicKey(@RequestParam("did") String did) {
+        log.info("begin queryDidDocument , cptId:{}", did);
+        return weIdSdkService.queryDidDocument(did);
+    }
+
+    @Description("获取Policy列表")
+    @GetMapping("/getPolicyList")
+    public ResponseData<PageDto<PolicyInfo>> getPolicyList(
+            @RequestParam(value = "iDisplayStart") int iDisplayStart,
+            @RequestParam(value = "iDisplayLength") int iDisplayLength
+    ) {
+        log.info("begin getPolicyList, iDisplayStart:{}, iDisplayLength:{}", iDisplayStart, iDisplayLength);
+        PageDto<PolicyInfo> pageDto = new PageDto<PolicyInfo>(iDisplayStart, iDisplayLength);
+        return weIdSdkService.getPolicyList(pageDto);
+    }
+
+    @Description("注册policy到链上")
+    @PostMapping("/registerClaimPolicy")
+    public ResponseData<Boolean> registerClaimPolicy(HttpServletRequest request) {
+        log.info("start registerClaimPolicy.");
+        String policyJson = request.getParameter("policy");
+        policyJson = StringEscapeUtils.unescapeHtml(policyJson);
+        Integer cptId = Integer.parseInt(request.getParameter("cptId"));
+        return weIdSdkService.registerClaimPolicy(cptId, policyJson);
     }
 
 }

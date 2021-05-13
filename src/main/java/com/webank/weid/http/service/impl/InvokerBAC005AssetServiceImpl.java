@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Component
+//@Component
 public class InvokerBAC005AssetServiceImpl extends BaseService implements InvokerBAC005AssetService {
 
     @Autowired

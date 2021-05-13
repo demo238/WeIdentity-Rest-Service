@@ -378,7 +378,7 @@ public class ConfigService {
         fileStr = fileStr.replace("${REDIS_ADDRESS}", loadConfig.get("redis_address"));
         fileStr = fileStr.replace("${REDIS_PASSWORD}", loadConfig.get("redis_password"));
         //将文件写入resource目录
-        FileUtils.writeToFile(fileStr, "resources/weidentity.properties", FileOperator.OVERWRITE);
+        FileUtils.writeToFile(fileStr, "src/main/resources/weidentity.properties", FileOperator.OVERWRITE);
     }
     
     /**
